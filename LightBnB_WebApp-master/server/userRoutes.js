@@ -7,6 +7,7 @@ module.exports = function (router, database) {
   // Create a new user
   router.post('/', (req, res) => {
     const user = req.body;
+    console.log(user, 'user info from create a new user')
     user.password = bcrypt.hashSync(user.password, 12);
     database.addUser(user)
       .then(user => {
@@ -29,6 +30,7 @@ module.exports = function (router, database) {
     return database.getUserWithEmail(email)
       .then(user => {
         if (bcrypt.compareSync(password, user.password)) {
+          console.log(user, 'user exists, inside login function')
           return user;
         }
         return null;
@@ -61,7 +63,7 @@ module.exports = function (router, database) {
       res.send({ message: "not logged in" });
       return;
     }
-
+    console.log(userId, '-userId get /me request ')
     database.getUserWithId(userId)
       .then(user => {
         if (!user) {
