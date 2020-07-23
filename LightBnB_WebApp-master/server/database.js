@@ -3,16 +3,16 @@
 const properties = require('./json/properties.json');
 const users = require('./json/users.json');
 
-const { Client } = require('pg')
+const { Pool } = require('pg')
 
-const client = new Client({
+const pool = new Pool({
   user: 'vagrant',
   password: '123',
   host: 'localhost',
   database: 'lightbnb'
 });
 
-client.connect(() => {
+pool.connect(() => {
   console.log('Client connected 😎')
 })
 
@@ -82,13 +82,17 @@ exports.getAllReservations = getAllReservations;
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
+
 const getAllProperties = function (options, limit = 10) {
-  const limitedProperties = {};
-  for (let i = 1; i <= limit; i++) {
-    limitedProperties[i] = properties[i];
-  }
-  return Promise.resolve(limitedProperties);
+  return pool
+    .query(`
+  SELECT * FROM properties
+  LIMIT $1
+  `, [limit]) //parameterized query here because limit data coming from somewhere else
+    .then(res => res.rows); //every .then returns a new promise with whatever was returned inside of it
 }
+
+
 exports.getAllProperties = getAllProperties;
 
 
