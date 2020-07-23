@@ -149,6 +149,7 @@ const getAllProperties = function (options, limit = 10) {
     queryString += `AND property_reviews.rating >=$${queryParams.length} `; //array length as dynamic $n placeholder number
   }
 
+
   // #4 Add any query that comes after the WHERE clause
   queryParams.push(limit);
   queryString += `
@@ -175,9 +176,42 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  const queryParams = [property.title, property.description, property.owner_id, property.cover_photo_url, property.thumbnail_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.province, property.city, property.country, property.street, property.post_code]
+  // let queryString = `
+  // INSERT INTO properties (
+  //   title, description, owner_id, cover_photo_url, thumbnail_photo_url, cost_per_night,
+  //   parking_spaces, number_of_bathrooms, number_of_bedrooms, active, province, city, country, street, post_code) 
+  //   VALUES ( '${property.title}', '${property.description}', '${property.owner_id}', '${property.cover_photo_url}', '${property.thumbnail_photo_url}', '${property.cost_per_night}', '${property.parking_spaces}', '${property.number_of_bathrooms}', '${property.number_of_bedrooms}', '${property.active}', '${property.province}', '${property.city}', '${property.country}', '${property.street}', '${property.post_code}') 
+  //   RETURNING *;
+  // `;
+  let queryString = `
+  INSERT INTO properties (
+    title, description, owner_id, cover_photo_url, thumbnail_photo_url, cost_per_night,
+    parking_spaces, number_of_bathrooms, number_of_bedrooms, province, city, country, street, post_code) 
+    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+    RETURNING *;
+  `;
+  console.log(queryString, queryParams)
+  return pool
+    .query(queryString, queryParams) //parameterized query here because limit data coming from somewhere else
+    .then(res => res.rows);
 }
+
+// addProperty({
+//   owner_id: 100,
+//   title: 'Koko',
+//   description: 'string',
+//   thumbnail_photo_url: 'url',
+//   cover_photo_url: 'url',
+//   cost_per_night: '120',
+//   street: 'William',
+//   city: 'Moncton',
+//   province: 'New Brunswick',
+//   post_code: 'E1A1z3',
+//   country: 'Canada',
+//   parking_spaces: '3',
+//   number_of_bathrooms: '1',
+//   number_of_bedrooms: '2'
+// })
+
 exports.addProperty = addProperty;
